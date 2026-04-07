@@ -58,3 +58,4 @@ websocket-client==1.8.0
 websockets==16.0
 Werkzeug==3.1.3
 wsproto==1.2.0
+web: gunicorn app:app
