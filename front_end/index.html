@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Irradiation Finder</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f5f7fa;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 60%;
+            margin: auto;
+            margin-top: 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #018bd5;
+        }
+
+        input {
+            padding: 10px;
+            margin: 10px;
+            width: 25%;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #018bd5;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #016fa8;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #018bd5;
+            color: white;
+        }
+
+        canvas {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Irradiation Analyzer</h1>
+
+    <input type="text" id="location" placeholder="Location Name">
+    <input type="number" id="lat" placeholder="Latitude">
+    <input type="number" id="lon" placeholder="Longitude">
+
+    <br>
+
+    <button onclick="getIrradiation()">Get Irradiation</button>
+
+    <!-- TABLE -->
+    <table id="resultTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+                <th>Year</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Minimum Irradiation</td>
+                <td id="minVal"></td>
+                <td id="minYear"></td>
+            </tr>
+            <tr>
+                <td>Average Irradiation</td>
+                <td id="avgVal"></td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Maximum Irradiation</td>
+                <td id="maxVal"></td>
+                <td id="maxYear"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- CHART -->
+    <canvas id="irradiationChart"></canvas>
+
+</div>
+
+<script>
+    let chart; // global chart variable
+
+    async function getIrradiation() {
+        const lat = document.getElementById("lat").value;
+        const lon = document.getElementById("lon").value;
+
+        const response = await fetch(`https://irradiation-api.onrender.com/irradiation?lat=${lat}&lon=${lon}`);
+        const data = await response.json();
+
+        // Parse response
+        const minVal = data.min_irradiation;
+        const minYear = data.min_year;
+
+        const maxVal = data.max_irradiation;
+        const maxYear = data.max_year;
+
+        const avgVal = data.avg_irradiation;
+
+        // Fill table
+        document.getElementById("minVal").innerText = minVal;
+        document.getElementById("minYear").innerText = minYear;
+
+        document.getElementById("maxVal").innerText = maxVal;
+        document.getElementById("maxYear").innerText = maxYear;
+
+        document.getElementById("avgVal").innerText = avgVal;
+
+        document.getElementById("resultTable").style.display = "table";
+
+        // Draw Chart
+        const ctx = document.getElementById("irradiationChart").getContext("2d");
+
+        // Destroy old chart if exists
+        if (chart) {
+            chart.destroy();
+        }
+
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Minimum', 'Average', 'Maximum'],
+                datasets: [{
+                    label: 'Irradiation',
+                    data: [minVal, avgVal, maxVal],
+                    backgroundColor: '#018bd5'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
