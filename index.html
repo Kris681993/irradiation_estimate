@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Irradiation Finder</title>
+</head>
+<body>
+
+<h2>Solar Irradiation Tool</h2>
+
+<label>Location Name:</label>
+<input type="text" id="location"><br><br>
+
+<label>Latitude:</label>
+<input type="text" id="lat"><br><br>
+
+<label>Longitude:</label>
+<input type="text" id="lon"><br><br>
+
+<button onclick="getIrradiation()">Get Irradiation</button>
+
+<h3>Results:</h3>
+<div id="result"></div>
+
+<script>
+function getIrradiation() {
+    let lat = document.getElementById("lat").value;
+    let lon = document.getElementById("lon").value;
+
+    fetch(`http://127.0.0.1:5000/irradiation?lat=${lat}&lon=${lon}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("result").innerHTML = `
+                <p><b>Maximum Irradiation:</b> ${data.max_irradiation}</p>
+                <p><b>Year of Maximum Irradiation:</b> ${data.max_year}</p>
+                <p><b>Minimum Irradiation:</b> ${data.min_irradiation}</p>
+                <p><b>Year of Minimum Irradiation:</b> ${data.min_year}</p>
+                <p><b>Average Irradiation:</b> ${data.avg_irradiation}</p>
+            `;
+        })
+        .catch(error => console.error(error));
+}
+</script>
+
+</body>
+</html>
