@@ -61,9 +61,9 @@ class Location(object):
         return avg_irrad
     
 class Site_details :
-    def __init__ (self, location_obj, pr, est_gen):
+    def __init__ (self, location_obj, pr):
         self.pr = pr
-        self.est_gen = est_gen
+        # self.est_gen = est_gen
         self.location = location_obj
 
     def max_generation(self):
@@ -71,6 +71,16 @@ class Site_details :
         max_gen = self.pr * max_irrad
         return max_gen
 
+    def min_generation(self):
+        min_irrad = self.location.min_irradiance_and_year()[1]
+        min_gen = min_irrad*self.pr
+        return min_gen
+
+    def avg_generation(self):
+        avg_irrad = self.location.avg_irradiance()
+        avg_gen = avg_irrad * self.pr
+        return avg_gen
+    
 # Created creamline Object
 
 project_location = Location(15.91,79.74)
@@ -78,11 +88,16 @@ project_location = Location(15.91,79.74)
 max_year, max_irradiation = project_location.max_irradiance_and_year()
 min_year, min_irrad  = project_location.min_irradiance_and_year()
 avg_irrad = project_location.avg_irradiance()
-print(f'Max irradiance of {max_irradiation} occured in year {max_year} \n')
-print(f'Min irradiance of {min_irrad} occured in year {min_year} \n')
-print(f'Average irradiance is {avg_irrad}')
+
+# print(f'Max irradiance of {max_irradiation} occured in year {max_year} \n')
+# print(f'Min irradiance of {min_irrad} occured in year {min_year} \n')
+# print(f'Average irradiance is {avg_irrad}')
 
 site_details = Site_details(project_location, 0.81, 1350)
 
-print(site_details.max_generation())
+max_gen = site_details.max_generation()
+min_gen = site_details.min_generation()
+avg_gen = site_details.avg_generation()
+
+
 

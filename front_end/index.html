@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Irradiation Finder</title>
+    <title>Irradiation & Generation Analyzer</title>
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
@@ -76,7 +76,7 @@
             margin-top: 30px;
         }
 
-        /* Loader styles */
+        /* Loader */
         #loader {
             margin-top: 20px;
             display: none;
@@ -102,15 +102,16 @@
 <body>
 
 <div class="container">
-    <h1>Irradiation Analyzer</h1>
+    <h1>Irradiation & Generation Analyzer</h1>
 
     <input type="text" id="location" placeholder="Location Name">
     <input type="number" id="lat" placeholder="Latitude">
     <input type="number" id="lon" placeholder="Longitude">
+    <input type="number" id="pr" placeholder="Performance Ratio (e.g. 0.75)">
 
     <br>
 
-    <button onclick="getIrradiation()">Get Irradiation</button>
+    <button onclick="getIrradiation()">Get Data</button>
 
     <!-- Loader -->
     <div id="loader">
@@ -143,6 +144,22 @@
                 <td id="maxVal"></td>
                 <td id="maxYear"></td>
             </tr>
+
+            <tr>
+                <td>Minimum Generation</td>
+                <td id="minGen"></td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Average Generation</td>
+                <td id="avgGen"></td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Maximum Generation</td>
+                <td id="maxGen"></td>
+                <td>-</td>
+            </tr>
         </tbody>
     </table>
 
@@ -157,57 +174,58 @@ let chart;
 async function getIrradiation() {
     const lat = document.getElementById("lat").value;
     const lon = document.getElementById("lon").value;
+    const pr = document.getElementById("pr").value;
 
     // Show loader
     document.getElementById("loader").style.display = "block";
     document.getElementById("resultTable").style.display = "none";
 
     try {
-        const response = await fetch(`https://irradiation-estimate.onrender.com/evaluate-generation?lat=${lat}&lon=${lon}`);
+        const response = await fetch(
+            `https://irradiation-estimate.onrender.com/evaluate-generation?lat=${lat}&lon=${lon}&pr=${pr}`
+        );
+
         const data = await response.json();
 
-        const minVal = data.min_irradiation;
-        const minYear = data.min_year;
+        // Irradiation
+        document.getElementById("minVal").innerText = data.min_irradiation;
+        document.getElementById("minYear").innerText = data.min_year;
 
-        const maxVal = data.max_irradiation;
-        const maxYear = data.max_year;
+        document.getElementById("maxVal").innerText = data.max_irradiation;
+        document.getElementById("maxYear").innerText = data.max_year;
 
-        const avgVal = data.avg_irradiation;
+        document.getElementById("avgVal").innerText = data.avg_irradiation;
 
-        // Fill table
-        document.getElementById("minVal").innerText = minVal;
-        document.getElementById("minYear").innerText = minYear;
-
-        document.getElementById("maxVal").innerText = maxVal;
-        document.getElementById("maxYear").innerText = maxYear;
-
-        document.getElementById("avgVal").innerText = avgVal;
+        // Generation
+        document.getElementById("minGen").innerText = data.min_generation;
+        document.getElementById("maxGen").innerText = data.max_generation;
+        document.getElementById("avgGen").innerText = data.avg_generation;
 
         document.getElementById("resultTable").style.display = "table";
 
-        // Chart
+        // Chart (Generation)
         const ctx = document.getElementById("irradiationChart").getContext("2d");
 
-        if (chart) {
-            chart.destroy();
-        }
+        if (chart) chart.destroy();
 
         chart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['Minimum', 'Average', 'Maximum'],
                 datasets: [{
-                    label: 'Irradiation',
-                    data: [minVal, avgVal, maxVal],
+                    label: 'Generation',
+                    data: [
+                        data.min_generation,
+                        data.avg_generation,
+                        data.max_generation
+                    ],
                     backgroundColor: '#018bd5'
                 }]
             },
             options: {
                 responsive: true,
                 scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                    y: { beginAtZero: true }
                 }
             }
         });
