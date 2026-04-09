@@ -17,7 +17,7 @@ def get_data():
 
     # Create object
     loc = Location(float(lat), float(lon))
-    site_details = Site_details(loc, float(pr/100))
+    site_details = Site_details(loc, (float(pr)/100))
 
     # Call your methods
     max_year, max_irradiation = loc.max_irradiance_and_year()
