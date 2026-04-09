@@ -62,7 +62,7 @@ class Location(object):
     
 
 # Created creamline Object    
-creamline = Location(17.39,78.55)
+creamline = Location(15.91,79.74)
 
 max_year, max_irradiation = creamline.max_irradiance_and_year()
 min_year, min_irrad  = creamline.min_irradiance_and_year()

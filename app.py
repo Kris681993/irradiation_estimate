@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from services import Location   # your file
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/irradiation', methods=['GET'])
+@app.route('/evaluate-generation', methods=['GET'])
 def get_irradiation():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
@@ -30,4 +31,4 @@ def get_irradiation():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
