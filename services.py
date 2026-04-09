@@ -61,9 +61,10 @@ class Location(object):
         return avg_irrad
     
 class Site_details :
-    def __init__ (self, location_obj, pr):
+    def __init__ (self, location_obj, pr, capacity):
         self.pr = pr
         # self.est_gen = est_gen
+        self.capacity = capacity
         self.location = location_obj
 
     def max_generation(self):
@@ -81,23 +82,38 @@ class Site_details :
         avg_gen = avg_irrad * self.pr
         return avg_gen
     
+    def max_plant_generation(self):
+        data = self.max_generation()
+        plant_max_gen = data * self.capacity
+        return plant_max_gen
+    
+    def min_plant_generation(self):
+        data = self.min_plant_generation()
+        plant_min_gen = data*self.capacity
+        return plant_min_gen
+    
+    def avg_plant_generation(self):
+        data = self.avg_generation()
+        avg_plant_gen = data*self.capacity
+        return avg_plant_gen
+    
 # Created creamline Object
 
-project_location = Location(15.91,79.74)
+# project_location = Location(15.91,79.74)
 
-max_year, max_irradiation = project_location.max_irradiance_and_year()
-min_year, min_irrad  = project_location.min_irradiance_and_year()
-avg_irrad = project_location.avg_irradiance()
+# max_year, max_irradiation = project_location.max_irradiance_and_year()
+# min_year, min_irrad  = project_location.min_irradiance_and_year()
+# avg_irrad = project_location.avg_irradiance()
 
-# print(f'Max irradiance of {max_irradiation} occured in year {max_year} \n')
-# print(f'Min irradiance of {min_irrad} occured in year {min_year} \n')
-# print(f'Average irradiance is {avg_irrad}')
+# # print(f'Max irradiance of {max_irradiation} occured in year {max_year} \n')
+# # print(f'Min irradiance of {min_irrad} occured in year {min_year} \n')
+# # print(f'Average irradiance is {avg_irrad}')
 
-site_details = Site_details(project_location, 0.81)
+# site_details = Site_details(project_location, 0.81)
 
-max_gen = site_details.max_generation()
-min_gen = site_details.min_generation()
-avg_gen = site_details.avg_generation()
+# max_gen = site_details.max_generation()
+# min_gen = site_details.min_generation()
+# avg_gen = site_details.avg_generation()
 
 
 

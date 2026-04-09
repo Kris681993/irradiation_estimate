@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Irradiation & Generation Analyzer</title>
 
     <!-- Google Font -->
@@ -11,34 +12,46 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Montserrat', sans-serif;
             background-color: #f5f7fa;
             text-align: center;
             margin: 0;
-            padding: 0;
+            padding: 20px;
         }
 
         .container {
-            width: 60%;
-            margin: auto;
-            margin-top: 40px;
+            width: 90%;
+            max-width: 1000px;
+            margin: 30px auto;
             background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             color: #018bd5;
+            margin-bottom: 25px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         input {
-            padding: 10px;
-            margin: 10px;
-            width: 25%;
+            padding: 12px;
+            width: 100%;
             border-radius: 8px;
             border: 1px solid #ccc;
+            font-size: 14px;
         }
 
         button {
@@ -50,6 +63,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: 0.3s;
+            margin-top: 10px;
         }
 
         button:hover {
@@ -60,11 +74,14 @@
             width: 100%;
             margin-top: 25px;
             border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 10px;
         }
 
         th, td {
             padding: 12px;
             border-bottom: 1px solid #ddd;
+            text-align: center;
         }
 
         th {
@@ -72,11 +89,15 @@
             color: white;
         }
 
-        canvas {
-            margin-top: 30px;
+        tr:hover {
+            background-color: #f9fbfd;
         }
 
-        /* Loader */
+        canvas {
+            margin-top: 30px;
+            max-height: 400px;
+        }
+
         #loader {
             margin-top: 20px;
             display: none;
@@ -92,34 +113,59 @@
             animation: spin 1s linear infinite;
         }
 
+        #errorBox {
+            display: none;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: #ffe8e8;
+            color: #b00020;
+            font-weight: 500;
+        }
+
+        #chartContainer {
+            margin-top: 30px;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            th, td {
+                font-size: 13px;
+                padding: 10px 6px;
+            }
+        }
     </style>
 </head>
-
 <body>
 
 <div class="container">
     <h1>Irradiation & Generation Analyzer</h1>
 
-    <input type="text" id="location" placeholder="Location Name">
-    <input type="number" id="lat" placeholder="Latitude">
-    <input type="number" id="lon" placeholder="Longitude">
-    <input type="number" id="pr" placeholder="Performance Ratio (e.g. 0.75)">
-
-    <br>
+    <div class="form-grid">
+        <input type="text" id="location" placeholder="Location Name (optional)">
+        <input type="number" id="plant-capacity" placeholder="Plant capacity in kWp" step="any">
+        <input type="number" id="lat" placeholder="Latitude" step="any">
+        <input type="number" id="lon" placeholder="Longitude" step="any">
+        <input type="number" id="pr" placeholder="Performance Ratio (e.g. 0.75)" step="any">
+    </div>
 
     <button onclick="getIrradiation()">Get Data</button>
 
-    <!-- Loader -->
     <div id="loader">
         <div class="spinner"></div>
         <p>Fetching data from satellite sources...</p>
     </div>
 
-    <!-- TABLE -->
+    <div id="errorBox"></div>
+
     <table id="resultTable" style="display:none;">
         <thead>
             <tr>
@@ -130,114 +176,177 @@
         </thead>
         <tbody>
             <tr>
-                <td>Minimum Irradiation_kWh/sq.mtr</td>
+                <td>Minimum Irradiation (kWh/sq.mtr)</td>
                 <td id="minVal"></td>
                 <td id="minYear"></td>
             </tr>
             <tr>
-                <td>Average Irradiation_kWh/sq.mtr</td>
+                <td>Average Irradiation (kWh/sq.mtr)</td>
                 <td id="avgVal"></td>
                 <td>-</td>
             </tr>
             <tr>
-                <td>Maximum Irradiation_kWh/sq.mtr</td>
+                <td>Maximum Irradiation (kWh/sq.mtr)</td>
                 <td id="maxVal"></td>
                 <td id="maxYear"></td>
             </tr>
 
             <tr>
-                <td>Minimum Specific Generation_kWh</td>
+                <td>Minimum Specific Generation (kWh)</td>
                 <td id="minGen"></td>
                 <td>-</td>
             </tr>
             <tr>
-                <td>Average Specific Generation_kWh</td>
+                <td>Average Specific Generation (kWh)</td>
                 <td id="avgGen"></td>
                 <td>-</td>
             </tr>
             <tr>
-                <td>Maximum Specific Generation_kWh</td>
+                <td>Maximum Specific Generation (kWh)</td>
                 <td id="maxGen"></td>
+                <td>-</td>
+            </tr>
+
+            <tr>
+                <td>Minimum Plant Generation (kWh)</td>
+                <td id="minPlantGen"></td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Average Plant Generation (kWh)</td>
+                <td id="avgPlantGen"></td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Maximum Plant Generation (kWh)</td>
+                <td id="maxPlantGen"></td>
                 <td>-</td>
             </tr>
         </tbody>
     </table>
 
-    <!-- CHART -->
-    <canvas id="irradiationChart"></canvas>
-
+    <div id="chartContainer">
+        <canvas id="irradiationChart"></canvas>
+    </div>
 </div>
 
 <script>
-let chart;
+    let chart;
 
-async function getIrradiation() {
-    const lat = document.getElementById("lat").value;
-    const lon = document.getElementById("lon").value;
-    const pr = document.getElementById("pr").value;
-
-    // Show loader
-    document.getElementById("loader").style.display = "block";
-    document.getElementById("resultTable").style.display = "none";
-
-    try {
-        const response = await fetch(
-            `https://irradiation-estimate.onrender.com/evaluate-generation?lat=${lat}&lon=${lon}&pr=${pr}`
-        );
-
-        const data = await response.json();
-
-        // Irradiation
-        document.getElementById("minVal").innerText = data.min_irradiation;
-        document.getElementById("minYear").innerText = data.min_year;
-
-        document.getElementById("maxVal").innerText = data.max_irradiation;
-        document.getElementById("maxYear").innerText = data.max_year;
-
-        document.getElementById("avgVal").innerText = data.avg_irradiation;
-
-        // Generation
-        document.getElementById("minGen").innerText = data.min_generation;
-        document.getElementById("maxGen").innerText = data.max_generation;
-        document.getElementById("avgGen").innerText = data.avg_generation;
-
-        document.getElementById("resultTable").style.display = "table";
-
-        // Chart (Generation)
-        const ctx = document.getElementById("irradiationChart").getContext("2d");
-
-        if (chart) chart.destroy();
-
-        chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Minimum', 'Average', 'Maximum'],
-                datasets: [{
-                    label: 'Generation',
-                    data: [
-                        data.min_generation,
-                        data.avg_generation,
-                        data.max_generation
-                    ],
-                    backgroundColor: '#018bd5'
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-
-    } catch (error) {
-        console.error(error);
-        alert("Error fetching data. Please try again.");
+    function showError(message) {
+        const errorBox = document.getElementById("errorBox");
+        errorBox.innerText = message;
+        errorBox.style.display = "block";
     }
 
-    // Hide loader
-    document.getElementById("loader").style.display = "none";
-}
+    function hideError() {
+        const errorBox = document.getElementById("errorBox");
+        errorBox.innerText = "";
+        errorBox.style.display = "none";
+    }
+
+    function setText(id, value) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerText = value ?? "-";
+        }
+    }
+
+    async function getIrradiation() {
+        const lat = document.getElementById("lat").value.trim();
+        const lon = document.getElementById("lon").value.trim();
+        const pr = document.getElementById("pr").value.trim();
+        const cap = document.getElementById("plant-capacity").value.trim();
+
+        hideError();
+        document.getElementById("resultTable").style.display = "none";
+
+        if (!lat || !lon || !pr || !cap) {
+            showError("Please fill in Latitude, Longitude, Performance Ratio, and Plant Capacity.");
+            return;
+        }
+
+        document.getElementById("loader").style.display = "block";
+
+        try {
+            const url = `https://irradiation-estimate.onrender.com/evaluate-generation?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&pr=${encodeURIComponent(pr)}&plant-capacity=${encodeURIComponent(cap)}`;
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to fetch data.");
+            }
+
+            setText("minVal", data.min_irradiation);
+            setText("minYear", data.min_year);
+            setText("avgVal", data.avg_irradiation);
+            setText("maxVal", data.max_irradiation);
+            setText("maxYear", data.max_year);
+
+            setText("minGen", data.min_generation);
+            setText("avgGen", data.avg_generation);
+            setText("maxGen", data.max_generation);
+
+            setText("minPlantGen", data.min_plant_gen);
+            setText("avgPlantGen", data.avg_plant_gen);
+            setText("maxPlantGen", data.max_plant_gen);
+
+            document.getElementById("resultTable").style.display = "table";
+
+            const ctx = document.getElementById("irradiationChart").getContext("2d");
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: ["Minimum", "Average", "Maximum"],
+                    datasets: [
+                        {
+                            label: "Specific Generation",
+                            data: [
+                                data.min_generation,
+                                data.avg_generation,
+                                data.max_generation
+                            ],
+                            backgroundColor: "#018bd5"
+                        },
+                        {
+                            label: "Plant Generation",
+                            data: [
+                                data.min_plant_gen,
+                                data.avg_plant_gen,
+                                data.max_plant_gen
+                            ],
+                            backgroundColor: "#66c2ff"
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: "kWh"
+                            }
+                        }
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error("Error:", error);
+            showError(error.message || "Error fetching data. Please try again.");
+        } finally {
+            document.getElementById("loader").style.display = "none";
+        }
+    }
 </script>
 
 </body>
