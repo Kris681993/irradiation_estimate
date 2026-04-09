@@ -88,7 +88,7 @@ class Site_details :
         return plant_max_gen
     
     def min_plant_generation(self):
-        data = self.min_plant_generation()
+        data = self.min_generation()
         plant_min_gen = data*self.capacity
         return plant_min_gen
     
