@@ -75,6 +75,27 @@
         canvas {
             margin-top: 30px;
         }
+
+        /* Loader styles */
+        #loader {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #018bd5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin: auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
@@ -90,6 +111,12 @@
     <br>
 
     <button onclick="getIrradiation()">Get Irradiation</button>
+
+    <!-- Loader -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p>Fetching data from satellite sources...</p>
+    </div>
 
     <!-- TABLE -->
     <table id="resultTable" style="display:none;">
@@ -125,16 +152,20 @@
 </div>
 
 <script>
-    let chart; // global chart variable
+let chart;
 
-    async function getIrradiation() {
-        const lat = document.getElementById("lat").value;
-        const lon = document.getElementById("lon").value;
+async function getIrradiation() {
+    const lat = document.getElementById("lat").value;
+    const lon = document.getElementById("lon").value;
 
-        const response = await fetch(`https://irradiation-api.onrender.com/irradiation?lat=${lat}&lon=${lon}`);
+    // Show loader
+    document.getElementById("loader").style.display = "block";
+    document.getElementById("resultTable").style.display = "none";
+
+    try {
+        const response = await fetch(`https://irradiation-estimate.onrender.com/irradiation?lat=${lat}&lon=${lon}`);
         const data = await response.json();
 
-        // Parse response
         const minVal = data.min_irradiation;
         const minYear = data.min_year;
 
@@ -154,10 +185,9 @@
 
         document.getElementById("resultTable").style.display = "table";
 
-        // Draw Chart
+        // Chart
         const ctx = document.getElementById("irradiationChart").getContext("2d");
 
-        // Destroy old chart if exists
         if (chart) {
             chart.destroy();
         }
@@ -181,7 +211,15 @@
                 }
             }
         });
+
+    } catch (error) {
+        console.error(error);
+        alert("Error fetching data. Please try again.");
     }
+
+    // Hide loader
+    document.getElementById("loader").style.display = "none";
+}
 </script>
 
 </body>
