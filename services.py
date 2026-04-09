@@ -60,16 +60,29 @@ class Location(object):
         avg_irrad = int(sum(data.values())/len(data.values()))
         return avg_irrad
     
+class Site_details :
+    def __init__ (self, location_obj, pr, est_gen):
+        self.pr = pr
+        self.est_gen = est_gen
+        self.location = location_obj
 
-# Created creamline Object    
-creamline = Location(15.91,79.74)
+    def max_generation(self):
+        max_irrad = self.location.max_irradiance_and_year()[1]
+        max_gen = self.pr * max_irrad
+        return max_gen
 
-max_year, max_irradiation = creamline.max_irradiance_and_year()
-min_year, min_irrad  = creamline.min_irradiance_and_year()
-avg_irrad = creamline.avg_irradiance()
+# Created creamline Object
+
+project_location = Location(15.91,79.74)
+
+max_year, max_irradiation = project_location.max_irradiance_and_year()
+min_year, min_irrad  = project_location.min_irradiance_and_year()
+avg_irrad = project_location.avg_irradiance()
 print(f'Max irradiance of {max_irradiation} occured in year {max_year} \n')
 print(f'Min irradiance of {min_irrad} occured in year {min_year} \n')
 print(f'Average irradiance is {avg_irrad}')
 
+site_details = Site_details(project_location, 0.81, 1350)
 
+print(site_details.max_generation())
 
