@@ -29,13 +29,13 @@ def get_data():
 
     return jsonify({
         "max_year": max_year,
-        "max_irradiation": max_irradiation,
+        "max_irradiation": int(max_irradiation),
         "min_year": min_year,
-        "min_irradiation": min_irrad,
-        "avg_irradiation": avg_irrad,
-        'max_generation' : max_gen,
-        'min_generation' : min_gen,
-        'avg_generation' : avg_gen
+        "min_irradiation": int(min_irrad),
+        "avg_irradiation": int(avg_irrad),
+        'max_generation' : int(max_gen),
+        'min_generation' : int(min_gen),
+        'avg_generation' : int(avg_gen)
     })
 
 if __name__ == '__main__':
