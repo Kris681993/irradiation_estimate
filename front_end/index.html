@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Irradiation & Generation Analyzer</title>
 
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -26,7 +23,7 @@
 
         .container {
             width: 90%;
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 30px auto;
             background: white;
             padding: 30px;
@@ -95,7 +92,7 @@
 
         canvas {
             margin-top: 30px;
-            max-height: 400px;
+            max-height: 420px;
         }
 
         #loader {
@@ -192,17 +189,17 @@
             </tr>
 
             <tr>
-                <td>Minimum Specific Generation (kWh)</td>
+                <td>Minimum Specific Generation (kWh/kWp/year)</td>
                 <td id="minGen"></td>
                 <td>-</td>
             </tr>
             <tr>
-                <td>Average Specific Generation (kWh)</td>
+                <td>Average Specific Generation (kWh/kWp/year)</td>
                 <td id="avgGen"></td>
                 <td>-</td>
             </tr>
             <tr>
-                <td>Maximum Specific Generation (kWh)</td>
+                <td>Maximum Specific Generation (kWh/kWp/year)</td>
                 <td id="maxGen"></td>
                 <td>-</td>
             </tr>
@@ -233,6 +230,20 @@
 <script>
     let chart;
 
+    function formatIndianNumber(value) {
+        if (value === null || value === undefined || value === "") {
+            return "-";
+        }
+
+        const num = Number(value);
+
+        if (Number.isNaN(num)) {
+            return value;
+        }
+
+        return num.toLocaleString("en-IN");
+    }
+
     function showError(message) {
         const errorBox = document.getElementById("errorBox");
         errorBox.innerText = message;
@@ -248,7 +259,7 @@
     function setText(id, value) {
         const el = document.getElementById(id);
         if (el) {
-            el.innerText = value ?? "-";
+            el.innerText = formatIndianNumber(value);
         }
     }
 
@@ -279,10 +290,12 @@
             }
 
             setText("minVal", data.min_irradiation);
-            setText("minYear", data.min_year);
+            document.getElementById("minYear").innerText = data.min_year ?? "-";
+
             setText("avgVal", data.avg_irradiation);
+
             setText("maxVal", data.max_irradiation);
-            setText("maxYear", data.max_year);
+            document.getElementById("maxYear").innerText = data.max_year ?? "-";
 
             setText("minGen", data.min_generation);
             setText("avgGen", data.avg_generation);
@@ -308,18 +321,18 @@
                         {
                             label: "Specific Generation",
                             data: [
-                                data.min_generation,
-                                data.avg_generation,
-                                data.max_generation
+                                Number(data.min_generation),
+                                Number(data.avg_generation),
+                                Number(data.max_generation)
                             ],
                             backgroundColor: "#018bd5"
                         },
                         {
                             label: "Plant Generation",
                             data: [
-                                data.min_plant_gen,
-                                data.avg_plant_gen,
-                                data.max_plant_gen
+                                Number(data.min_plant_gen),
+                                Number(data.avg_plant_gen),
+                                Number(data.max_plant_gen)
                             ],
                             backgroundColor: "#66c2ff"
                         }
@@ -331,9 +344,23 @@
                     scales: {
                         y: {
                             beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return Number(value).toLocaleString("en-IN");
+                                }
+                            },
                             title: {
                                 display: true,
                                 text: "kWh"
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ": " + Number(context.raw).toLocaleString("en-IN");
+                                }
                             }
                         }
                     }

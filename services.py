@@ -96,24 +96,3 @@ class Site_details :
         data = self.avg_generation()
         avg_plant_gen = data*self.capacity
         return avg_plant_gen
-    
-# Created creamline Object
-
-# project_location = Location(15.91,79.74)
-
-# max_year, max_irradiation = project_location.max_irradiance_and_year()
-# min_year, min_irrad  = project_location.min_irradiance_and_year()
-# avg_irrad = project_location.avg_irradiance()
-
-# # print(f'Max irradiance of {max_irradiation} occured in year {max_year} \n')
-# # print(f'Min irradiance of {min_irrad} occured in year {min_year} \n')
-# # print(f'Average irradiance is {avg_irrad}')
-
-# site_details = Site_details(project_location, 0.81)
-
-# max_gen = site_details.max_generation()
-# min_gen = site_details.min_generation()
-# avg_gen = site_details.avg_generation()
-
-
-
