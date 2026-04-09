@@ -93,7 +93,7 @@ avg_irrad = project_location.avg_irradiance()
 # print(f'Min irradiance of {min_irrad} occured in year {min_year} \n')
 # print(f'Average irradiance is {avg_irrad}')
 
-site_details = Site_details(project_location, 0.81, 1350)
+site_details = Site_details(project_location, 0.81)
 
 max_gen = site_details.max_generation()
 min_gen = site_details.min_generation()
